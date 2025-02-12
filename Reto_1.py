@@ -95,7 +95,7 @@ def Del_listMat(List_Materiales: list, indice_mat):
 def Calc_NRC(List_Materiales: list):
     
     for dict in List_Materiales:
-        Promedio1 = lambda a,b,c,d : (a+b+c+d)/4 #Funcion que realiza el promedio de los datos
+        Promedio1 = lambda a,b,c,d : round((a+b+c+d)/4,2) #Funcion que realiza el promedio de los datos
         dict["NRC"]= Promedio1(dict["Resultados"][0],dict["Resultados"][1],dict["Resultados"][2],dict["Resultados"][3]) # Se agrega el promedio a la lista de materiales
 
 def Show_listRst(List_Materiales: list):
@@ -107,6 +107,34 @@ def Show_listRst(List_Materiales: list):
     for dict in List_Materiales:
         x += 1
         print("{:<5} {:<10} {:<10} {:<10} {:<10} {:<10} {:<10}".format(x, dict["Material"], dict["Resultados"][0], dict["Resultados"][1], dict["Resultados"][2], dict["Resultados"][3], dict["NRC"])) # Imprime los resultados
+
+def Export_file(List_Materiales: list, List_MatSort: list, Minimo: dict, Maximo: dict):
+    with open("Informe de Resultados - Absorción Acústica.txt","w") as file:
+        file.write("Materiales - Absorción Acústica")
+
+        file.write("\n{:<5} {:<12} {:<10} {:<10} {:<10} {:<10} {:<10} {:<10}".format("#","Fecha","Material","250 Hz","500 Hz","1 KHz","2 KHz","NRC"))
+        file.write("\n{:<5} {:<12} {:<10} {:<10} {:<10} {:<10} {:<10} {:<10}".format("---","----------","---------","------","------","------","------","-----"))
+        x = 0
+
+        for dict in List_Materiales:
+            x += 1
+            file.write("\n{:<5} {:<12} {:<10} {:<10} {:<10} {:<10} {:<10} {:<10}".format(x, dict["Fecha"], dict["Material"], dict["Resultados"][0], dict["Resultados"][1], dict["Resultados"][2], dict["Resultados"][3], dict["NRC"]))
+
+        file.write("\nMateriales - Absorción Acústica (Ordenados)")
+
+        file.write("\n{:<5} {:<10} {:<10} {:<10} {:<10} {:<10} {:<10}".format("#","Material", "250 Hz", "500 Hz", "1 KHz", "2 KHz", "NRC")) # Imprime titulos 
+        file.write("\n{:<5} {:<10} {:<10} {:<10} {:<10} {:<10} {:<10}".format("---","---------","------","------","------","------","------")) # Imprime separadores 
+        x = 0
+
+        for dict in List_MatSort:
+            x += 1
+            file.write("\n{:<5} {:<10} {:<10} {:<10} {:<10} {:<10} {:<10}".format(x, dict["Material"], dict["Resultados"][0], dict["Resultados"][1], dict["Resultados"][2], dict["Resultados"][3], dict["NRC"])) # Imprime los resultados
+
+        file.write(f"\nEl mayor valor de NRC es de: {Maximo["NRC"]} y corresponde al material: {Maximo["Material"]}")
+        file.write(f"\nEl menor valor de NRC es de: {Minimo["NRC"]} y corresponde al material: {Minimo["Material"]}")
+
+        file.close()
+
 
 #PROGRAMA ----------------------------------------------------------------------
 while True:
@@ -137,10 +165,10 @@ while True:
             if Val_nombre(material): # Verifica (True/False) si el nombre es aceptada o no para pasar al siguiente item
                 break
 
-        resultado1 = float(input("\nIngrese la abs en la banda de 250 Hz: "))
-        resultado2 = float(input("\nIngrese la abs en la banda de 500 Hz: "))
-        resultado3 = float(input("\nIngrese la abs en la banda de 1KHz: "))
-        resultado4 = float(input("\nIngrese la abs en la banda de 2KHz: "))
+        resultado1 = round(float(input("\nIngrese la abs en la banda de 250 Hz: ")),2)
+        resultado2 = round(float(input("\nIngrese la abs en la banda de 500 Hz: ")),2)
+        resultado3 = round(float(input("\nIngrese la abs en la banda de 1KHz: ")),2)
+        resultado4 = round(float(input("\nIngrese la abs en la banda de 2KHz: ")),2)
         #Val_resultado(resultado)
 
         Dict_Material = add_exp(fecha, material, resultado1, resultado2, resultado3, resultado4) #Creamos un diccionario del material agregado
@@ -247,7 +275,7 @@ while True:
             List_MatSort = sorted(List_Materiales, key=lambda k: k["NRC"]) # Busca el valor de la llave en cada diccionario de la lista y ordena de mneor a mayor
             
             print("\nA continuación se presentan los materiales ordenados de menor a mayor absorción acústica: ")
-            Show_listRst(List_MatSort)
+            Show_listRst(List_MatSort)# Se orden la lista de menor a mayor valor de NRC
 
             print("\nEl mayor valor de NRC es de: ", Maximo["NRC"], "y corresponde al material: ", Maximo["Material"])
             print("El menor valor de NRC es de: ", Minimo["NRC"], "y corresponde al material: ", Minimo["Material"])
@@ -260,11 +288,11 @@ while True:
     elif menu == 7:
         
         if len(List_Materiales) != 0 and len(List_MatSort) != 0:
-            file = open("Informe de Resultados - Absorción Acústica","w")
-            file. write("")
-            file.close()
+
+            Export_file(List_Materiales, List_MatSort, Minimo, Maximo) # Exporta el informe de resultados en un archivo .txt
+
         else:
-            print("\nAun no se han agregado materiales al programa - Intente de nuevo")
+            print("\nAun no se encuentra la informacion completa para generar el informe - Intente de nuevo")
 
     if menu == 8:
         print("\nFin del programa")
